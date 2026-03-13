@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="TutorFlow — A dashboard to manage students, sessions, payments, and scheduling for private tutors.">
+<title>TutorFlow</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f0f2f5;--surface:#fff;--border:#e8eaed;
+  --text:#111;--text2:#6b7280;--text3:#9ca3af;--black:#111;
+  --green:#10b981;--green-bg:#d1fae5;--green-dark:#065f46;
+  --red:#ef4444;--red-bg:#fee2e2;--red-dark:#991b1b;
+  --purple:#6366f1;--purple-bg:#eef2ff;--purple-dark:#3730a3;
+  --orange:#f59e0b;--orange-bg:#fffbeb;
+  --blue:#3b82f6;--blue-bg:#dbeafe;--blue-dark:#1e40af;
+  --radius:18px;--radius-sm:10px;--radius-xs:8px;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);
+  --shadow-lg:0 8px 40px rgba(0,0,0,.14);
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;-webkit-font-smoothing:antialiased}
+
+/* ─── SIDEBAR ─── */
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:260px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100}
+.sidebar-logo{display:flex;align-items:center;gap:10px;padding:22px 20px 16px}
+.logo-box{width:36px;height:36px;background:var(--black);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:15px;flex-shrink:0}
+.logo-name{font-size:17px;font-weight:800;letter-spacing:-.4px}
+.nav{padding:6px 12px;flex:1}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);cursor:pointer;color:var(--text2);font-size:14px;font-weight:500;transition:all .15s;margin-bottom:2px;user-select:none;background:none;border:none;width:100%;text-align:left;font-family:inherit}
+.nav-item svg{width:18px;height:18px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nav-item:hover{background:var(--bg);color:var(--text)}
+.nav-item:focus-visible{outline:2px solid var(--purple);outline-offset:2px}
+.nav-item.active{background:var(--black);color:#fff}
+.sidebar-bottom{padding:12px}
+.sidebar-profile{padding:14px 16px;background:var(--bg);border-radius:var(--radius-sm)}
+.profile-tag{font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--text3);margin-bottom:3px}
+.profile-name{font-size:14px;font-weight:700}
+
+/* ─── MAIN ─── */
+.main{margin-left:260px;min-height:100vh}
+.page{display:none;padding:36px 40px;animation:fadeIn .2s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* ─── PAGE HEADER ─── */
+.ph{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px}
+.ph h1{font-size:32px;font-weight:800;letter-spacing:-.7px}
+.ph p{color:var(--text2);font-size:14px;margin-top:4px}
+
+/* ─── BUTTONS ─── */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:11px 20px;border-radius:999px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;font-family:inherit}
+.btn-black{background:var(--black);color:#fff}
+.btn-black:hover{background:#333;transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.2)}
+.btn-outline{background:var(--surface);color:var(--text);border:1.5px solid var(--border)}
+.btn-outline:hover{background:var(--bg)}
+.btn-red{background:var(--red-bg);color:var(--red-dark);border:none}
+.btn-red:hover{background:#fecaca}
+.btn-sm{padding:7px 14px;font-size:13px}
+.btn-xs{padding:4px 10px;font-size:12px}
+.icon-btn{width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;border:none;background:var(--black);border-radius:var(--radius-xs);cursor:pointer;color:#fff;transition:all .15s;font-size:15px;font-weight:700}
+.icon-btn:hover{background:#333}
+.icon-btn.outline{background:var(--bg);color:var(--text2);border:1.5px solid var(--border)}
+.icon-btn.outline:hover{background:var(--border);color:var(--text)}
+
+/* ─── STAT CARDS ─── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.stat-card{background:var(--surface);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);transition:box-shadow .2s,transform .2s}
+.stat-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.09);transform:translateY(-2px)}
+.stat-card.featured{background:var(--green);color:#fff}
+.stat-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+.stat-label{font-size:13px;color:var(--text2);font-weight:500;margin-bottom:6px}
+.stat-card.featured .stat-label{color:rgba(255,255,255,.8)}
+.stat-value{font-size:28px;font-weight:800;letter-spacing:-1px}
+.stat-card.featured .stat-value{color:#fff}
+.stat-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;background:rgba(255,255,255,.22);color:#fff;padding:2px 8px;border-radius:999px;margin-bottom:10px}
+
+/* ─── PANELS ─── */
+.panel{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:20px}
+.panel-header{padding:20px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
+.panel-title{font-size:16px;font-weight:700;letter-spacing:-.3px}
+.panel-link{color:var(--purple);font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px;background:none;border:none;font-family:inherit}
+
+/* ─── TABLE ─── */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead tr{border-bottom:1px solid var(--border)}
+th{padding:10px 20px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text3)}
+td{padding:14px 20px;font-size:14px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr{transition:background .1s}
+tbody tr:hover td{background:#fafafa}
+
+/* ─── BADGE ─── */
+.badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600}
+.badge-green{background:var(--green-bg);color:var(--green-dark)}
+.badge-red{background:var(--red-bg);color:var(--red-dark)}
+.badge-yellow{background:var(--orange-bg);color:#92400e}
+.badge-blue{background:var(--blue-bg);color:var(--blue-dark)}
+.badge-purple{background:var(--purple-bg);color:var(--purple-dark)}
+.badge-gray{background:#f3f4f6;color:#374151}
+
+/* ─── AVATAR ─── */
+.avatar{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;font-weight:700;color:#fff;flex-shrink:0}
+.scell{display:flex;align-items:center;gap:10px}
+.scell-name{font-weight:600;font-size:14px}
+.scell-sub{font-size:12px;color:var(--text3)}
+
+/* ─── STUDENT CARDS ─── */
+.s-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:16px;padding:20px}
+.s-card{background:var(--surface);border-radius:var(--radius);padding:20px;border:1.5px solid var(--border);box-shadow:var(--shadow);transition:all .15s}
+.s-card:hover{border-color:#d1d5db;box-shadow:0 4px 20px rgba(0,0,0,.09);transform:translateY(-2px)}
+.s-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.s-name{font-size:15px;font-weight:700;margin-top:8px}
+.s-sub{font-size:13px;color:var(--text2);margin-top:2px}
+.s-meta{display:flex;flex-direction:column;gap:7px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.s-row{display:flex;justify-content:space-between;font-size:13px}
+.s-row-l{color:var(--text2)}
+.s-row-v{font-weight:600}
+.s-actions{display:flex;gap:8px;margin-top:14px}
+
+/* ─── CALENDAR ─── */
+.cal-ctrl{display:flex;align-items:center;gap:10px}
+.cal-title{font-size:17px;font-weight:700;letter-spacing:-.4px;min-width:180px;text-align:center}
+.cal-views{display:flex;gap:2px;background:var(--bg);border-radius:var(--radius-sm);padding:3px}
+.cal-view-btn{padding:6px 14px;border-radius:var(--radius-xs);border:none;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;background:none;color:var(--text2);transition:all .15s}
+.cal-view-btn.active{background:var(--black);color:#fff}
+.cal-view-btn:disabled{opacity:.4;cursor:not-allowed}
+.today-btn{padding:7px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .15s}
+.today-btn:hover{background:var(--border)}
+.cal-hdr{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border)}
+.cal-hdr div{background:var(--bg);text-align:center;padding:10px 4px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border)}
+.cal-cell{background:var(--surface);min-height:86px;padding:8px;cursor:pointer;transition:background .1s}
+.cal-cell:hover{background:#fafafa}
+.cal-cell.other{background:#f9fafb}
+.cal-cell.today .day-n{background:var(--black);color:#fff;width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px}
+.day-n{font-size:13px;font-weight:500;color:var(--text2);display:block;margin-bottom:3px}
+.cal-cell.other .day-n{color:var(--text3)}
+.cal-chip{font-size:11px;font-weight:600;padding:2px 7px;border-radius:999px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;cursor:pointer;border:none;background:none;text-align:left;width:100%;font-family:inherit}
+.cal-chip.scheduled{background:var(--blue-bg);color:var(--blue-dark)}
+.cal-chip.completed{background:var(--green-bg);color:var(--green-dark)}
+.cal-chip.cancelled{background:#f3f4f6;color:var(--text3);text-decoration:line-through}
+
+/* ─── TWO COL ─── */
+.two-col{display:grid;grid-template-columns:1.4fr 1fr;gap:20px}
+
+/* ─── PAY STATS ─── */
+.pay-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+.pay-card{background:var(--surface);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow)}
+.pay-card.featured{background:var(--green);color:#fff}
+.pay-card.red-card .pay-val{color:var(--red)}
+.pay-icon{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.pay-card.featured .pay-icon{background:rgba(255,255,255,.2)}
+.pay-label{font-size:13px;color:var(--text2);font-weight:500;margin-bottom:6px}
+.pay-card.featured .pay-label{color:rgba(255,255,255,.8)}
+.pay-val{font-size:30px;font-weight:800;letter-spacing:-1px}
+.pay-card.featured .pay-val{color:#fff}
+
+/* ─── EMPTY ─── */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:52px 24px;text-align:center}
+.empty-icon{width:52px;height:52px;border-radius:14px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:14px}
+.empty h3{font-size:15px;font-weight:700;margin-bottom:6px}
+.empty p{font-size:13px;color:var(--text2)}
+.empty-cta{color:var(--purple);font-weight:600;font-size:13px;cursor:pointer;background:none;border:none;font-family:inherit;margin-top:10px}
+
+/* ─── SEARCH ─── */
+.search-wrap{position:relative}
+.search-wrap input{width:100%;padding:10px 14px 10px 38px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:14px;background:var(--bg);outline:none;transition:border-color .15s}
+.search-wrap input:focus{border-color:var(--black);background:#fff}
+.search-ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none}
+
+/* ─── MODAL ─── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.38);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;pointer-events:none;transition:opacity .2s}
+.overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border-radius:22px;padding:32px;width:520px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:var(--shadow-lg);transform:scale(.96) translateY(8px);transition:transform .2s}
+.overlay.open .modal{transform:scale(1) translateY(0)}
+.modal h2{font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px}
+.modal .sub{font-size:13px;color:var(--text2);margin-bottom:24px}
+.mfooter{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;padding-top:20px;border-top:1px solid var(--border)}
+
+/* ─── FORM ─── */
+.fg{margin-bottom:16px}
+.fg label{display:block;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.fg input,.fg select,.fg textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:14px;color:var(--text);background:#f8f9fa;outline:none;transition:border-color .15s,background .15s;-webkit-appearance:none;appearance:none}
+.fg select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--black);background:#fff;box-shadow:0 0 0 3px rgba(0,0,0,.05)}
+.fg textarea{resize:vertical}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* ─── CONFIRM MODAL ─── */
+.confirm-modal{width:380px}
+.confirm-modal h2{font-size:18px}
+.confirm-modal .sub{margin-bottom:18px}
+
+/* ─── DELETE BTN ─── */
+.del-btn{width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;border-radius:var(--radius-xs);border:1.5px solid var(--border);background:var(--bg);cursor:pointer;color:var(--text3);transition:all .15s;font-size:15px}
+.del-btn:hover{background:var(--red-bg);border-color:#fca5a5;color:var(--red)}
+
+/* ─── TOAST ─── */
+.toasts{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--black);color:#fff;padding:13px 18px;border-radius:12px;font-size:13px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.2);display:flex;align-items:center;gap:9px;animation:toastIn .25s cubic-bezier(.34,1.56,.64,1);max-width:320px}
+.toast.success{background:#065f46}
+.toast.error{background:#991b1b}
+@keyframes toastIn{from{transform:translateX(20px) scale(.95);opacity:0}to{transform:translateX(0) scale(1);opacity:1}}
+
+/* ─── SETUP BANNER ─── */
+.banner{background:#fffbeb;border:1.5px solid #fde68a;border-radius:var(--radius-sm);padding:13px 18px;margin-bottom:24px;display:flex;align-items:center;gap:12px;font-size:13px}
+.banner.hidden{display:none}
+.banner button.link{color:var(--purple);font-weight:600;cursor:pointer;margin-left:4px;background:none;border:none;font-family:inherit;font-size:inherit}
+
+/* ─── SETTINGS ─── */
+.set-card{background:var(--surface);border-radius:var(--radius);padding:26px;box-shadow:var(--shadow);margin-bottom:16px}
+.set-card h3{font-size:15px;font-weight:700;margin-bottom:4px}
+.set-card > p{font-size:13px;color:var(--text2);margin-bottom:18px;line-height:1.6}
+.steps{counter-reset:step;display:flex;flex-direction:column;gap:12px}
+.step{display:flex;align-items:flex-start;gap:12px;font-size:13px;color:var(--text2);line-height:1.6;counter-increment:step}
+.step::before{content:counter(step);width:22px;height:22px;border-radius:50%;background:var(--black);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
+
+/* ─── LOADING ─── */
+.spin{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--black);animation:spin .6s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ─── QUICK ACTIONS ─── */
+.quick-actions{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap}
+.qa-btn{display:flex;align-items:center;gap:8px;padding:14px 20px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--surface);cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;color:var(--text);transition:all .15s;box-shadow:var(--shadow)}
+.qa-btn:hover{border-color:#d1d5db;box-shadow:0 4px 16px rgba(0,0,0,.09);transform:translateY(-1px)}
+.qa-btn .qa-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.qa-btn:active{transform:scale(.97)}
+
+/* ─── MARK DONE BTN ─── */
+.mark-done-btn{width:36px;height:36px;border-radius:50%;border:2px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .15s;flex-shrink:0;color:var(--text3)}
+.mark-done-btn:hover{border-color:var(--green);background:var(--green-bg);color:var(--green)}
+.mark-done-btn.done{border-color:var(--green);background:var(--green);color:#fff;pointer-events:none}
+
+/* ─── UNDO TOAST ─── */
+.toast .undo-btn{background:rgba(255,255,255,.2);color:#fff;border:none;padding:5px 12px;border-radius:6px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;margin-left:8px;transition:background .15s;white-space:nowrap}
+.toast .undo-btn:hover{background:rgba(255,255,255,.35)}
+.toast .undo-timer{width:100%;height:3px;background:rgba(255,255,255,.2);border-radius:2px;margin-top:6px;overflow:hidden}
+.toast .undo-timer-bar{height:100%;background:rgba(255,255,255,.6);border-radius:2px;transition:width linear}
+
+/* ─── SUCCESS FLASH ─── */
+@keyframes successFlash{0%{background:var(--green-bg)}100%{background:transparent}}
+.flash-success{animation:successFlash .8s ease}
+
+/* ─── STAT HELPER TEXT ─── */
+.stat-helper{font-size:11px;color:var(--text3);margin-top:4px;font-weight:500}
+.stat-card.featured .stat-helper{color:rgba(255,255,255,.7)}
+
+/* ─── COLLAPSIBLE SETTINGS ─── */
+.set-toggle{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:0;background:none;border:none;width:100%;text-align:left;font-family:inherit}
+.set-toggle h3{font-size:15px;font-weight:700;margin:0}
+.set-toggle .chevron{transition:transform .2s;font-size:18px;color:var(--text3)}
+.set-toggle .chevron.open{transform:rotate(180deg)}
+.set-body{overflow:hidden;transition:max-height .3s ease,opacity .2s ease}
+.set-body.collapsed{max-height:0!important;opacity:0;padding-top:0!important;margin-top:0!important}
+
+/* ─── MOBILE BOTTOM NAV ─── */
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:200;padding:6px 0 env(safe-area-inset-bottom,8px);box-shadow:0 -2px 12px rgba(0,0,0,.06)}
+.bottom-nav-inner{display:flex;justify-content:space-around;align-items:center}
+.bnav-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 8px;border:none;background:none;cursor:pointer;color:var(--text3);font-family:inherit;font-size:10px;font-weight:600;transition:color .15s;min-width:56px}
+.bnav-item svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.bnav-item.active{color:var(--black)}
+.bnav-item:active{transform:scale(.9)}
+
+@media(max-width:960px){
+  .sidebar{width:200px}.main{margin-left:200px}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .two-col{grid-template-columns:1fr}.pay-stats{grid-template-columns:1fr}
+}
+@media(max-width:680px){
+  .sidebar{display:none}
+  .main{margin-left:0;padding-bottom:80px}
+  .page{padding:18px 16px}
+  .bottom-nav{display:block}
+
+  /* Larger touch targets */
+  body{font-size:15px}
+  .btn{padding:14px 22px;font-size:15px;min-height:48px}
+  .btn-sm{padding:11px 16px;font-size:14px;min-height:44px}
+  .btn-xs{padding:8px 14px;font-size:13px;min-height:40px}
+  .fg input,.fg select,.fg textarea{padding:14px 16px;font-size:16px;min-height:48px}
+  .frow{grid-template-columns:1fr;gap:0}
+  .ph h1{font-size:24px}
+  .ph{flex-direction:column;gap:12px}
+  .stat-value{font-size:22px}
+  .stat-card{padding:16px}
+  .stats-grid{gap:10px}
+
+  /* Full-width modal on mobile */
+  .modal{width:100%;max-width:100vw;border-radius:18px 18px 0 0;max-height:88vh;padding:24px 20px}
+  .overlay{align-items:flex-end}
+
+  /* Larger toasts on mobile */
+  .toasts{left:12px;right:12px;bottom:88px}
+  .toast{max-width:100%;font-size:14px;padding:14px 16px;border-radius:14px}
+
+  /* Quick actions stack */
+  .quick-actions{flex-direction:column}
+  .qa-btn{justify-content:flex-start}
+
+  /* Tables scroll hint */
+  .table-wrap{-webkit-overflow-scrolling:touch}
+  td,th{padding:10px 14px;font-size:13px}
+  th{font-size:10px}
+
+  .mark-done-btn{width:44px;height:44px;font-size:20px}
+  .search-wrap input{min-height:48px;font-size:16px}
+  select{min-height:48px;font-size:16px}
+  .cal-cell{min-height:60px;padding:4px}
+  .day-n{font-size:11px}
+  .cal-chip{font-size:10px;padding:1px 5px}
+  .pay-stats{gap:10px}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ SIDEBAR ══════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-box">T</div>
+    <div class="logo-name">TutorFlow</div>
+  </div>
+  <nav class="nav" id="mainNav" role="navigation" aria-label="Main navigation">
+    <button class="nav-item active" data-page="dashboard" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      Dashboard
+    </button>
+    <button class="nav-item" data-page="students" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Students
+    </button>
+    <button class="nav-item" data-page="calendar" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Calendar
+    </button>
+    <button class="nav-item" data-page="payments" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      Payments
+    </button>
+    <button class="nav-item" data-page="settings" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Settings
+    </button>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="sidebar-profile">
+      <div class="profile-tag">Tutor Profile</div>
+      <div class="profile-name" id="sidebarName">Private Tutor</div>
+    </div>
+  </div>
+</aside>
+
+<!-- ══════════════════ MAIN ══════════════════ -->
+<main class="main">
+
+  <!-- ══ DASHBOARD ══ -->
+  <div class="page active" id="page-dashboard">
+    <div class="banner" id="setupBanner">
+      <span><strong>Demo mode</strong> — data is saved locally in your browser. <button class="link" type="button" data-goto="settings">Connect Google Sheet in Settings</button></span>
+    </div>
+    <div class="ph">
+      <div><h1 id="greetMsg">Welcome back!</h1><p id="todayLabel">Loading...</p></div>
+      <button class="btn btn-black" data-action="openAddSession" type="button">+ Schedule Session</button>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#eef2ff"><svg width="22" height="22" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div class="stat-label">Total Students</div>
+        <div class="stat-value" id="st-students">0</div>
+        <div class="stat-helper" id="st-students-help">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fffbeb"><svg width="22" height="22" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+        <div class="stat-label">Sessions This Month</div>
+        <div class="stat-value" id="st-sessions">0</div>
+        <div class="stat-helper" id="st-sessions-help">—</div>
+      </div>
+      <div class="stat-card featured">
+        <div class="stat-badge"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> This Month</div>
+        <div class="stat-label">Revenue Collected</div>
+        <div class="stat-value" id="st-revenue">0</div>
+        <div class="stat-helper" id="st-revenue-help">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fee2e2"><svg width="22" height="22" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+        <div class="stat-label">Outstanding Dues</div>
+        <div class="stat-value" style="color:var(--red)" id="st-dues">0</div>
+        <div class="stat-helper" id="st-dues-help">—</div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <button class="qa-btn" type="button" data-action="markAllTodayDone">
+        <div class="qa-icon" style="background:var(--green-bg)">✅</div>
+        Mark Today's Done
+      </button>
+      <button class="qa-btn" type="button" data-action="openAddPayment">
+        <div class="qa-icon" style="background:var(--purple-bg)">💰</div>
+        Record Payment
+      </button>
+      <button class="qa-btn" type="button" data-action="openAddSession">
+        <div class="qa-icon" style="background:var(--blue-bg)">📅</div>
+        Add Session
+      </button>
+      <button class="qa-btn" type="button" data-action="copyLastWeek">
+        <div class="qa-icon" style="background:var(--orange-bg)">📋</div>
+        Copy Last Week
+      </button>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Today's Schedule</div>
+          <button class="panel-link" type="button" data-goto="calendar">View Calendar</button>
+        </div>
+        <div id="d-today"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title">Pending Dues</div></div>
+        <div id="d-dues"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Recent Payments</div>
+        <button class="panel-link" type="button" data-goto="payments">View All</button>
+      </div>
+      <div class="table-wrap" id="d-payments"></div>
+    </div>
+  </div>
+
+  <!-- ══ STUDENTS ══ -->
+  <div class="page" id="page-students">
+    <div class="ph">
+      <div><h1>Students</h1><p>Manage your student profiles and progress.</p></div>
+      <button class="btn btn-black" data-action="openAddStudent" type="button">+ Add New Student</button>
+    </div>
+    <div class="panel" style="padding:16px;margin-bottom:20px">
+      <div style="display:flex;gap:10px">
+        <div class="search-wrap" style="flex:1">
+          <span class="search-ico" aria-hidden="true"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+          <input id="studentSearch" placeholder="Search by name or subject..." aria-label="Search students">
+        </div>
+        <select id="statusFilter" aria-label="Filter by status" style="padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:14px;background:var(--bg);outline:none;cursor:pointer">
+          <option value="">All Status</option>
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+          <option value="On Hold">On Hold</option>
+        </select>
+      </div>
+    </div>
+    <div id="studentsWrap"></div>
+  </div>
+
+  <!-- ══ CALENDAR ══ -->
+  <div class="page" id="page-calendar">
+    <div class="ph">
+      <div><h1>Calendar</h1><p>Schedule and manage your tuition sessions.</p></div>
+      <button class="btn btn-black" data-action="openAddSession" type="button">+ Schedule Session</button>
+    </div>
+    <div class="panel">
+      <div class="panel-header" style="padding-bottom:18px">
+        <div class="cal-ctrl">
+          <button class="icon-btn" data-action="prevMonth" type="button" aria-label="Previous month">&#8249;</button>
+          <button class="icon-btn" data-action="nextMonth" type="button" aria-label="Next month">&#8250;</button>
+          <button class="today-btn" data-action="jumpToday" type="button">today</button>
+          <div class="cal-title" id="calTitle" aria-live="polite">—</div>
+        </div>
+        <div class="cal-views">
+          <button class="cal-view-btn active" type="button">month</button>
+          <button class="cal-view-btn" type="button" disabled title="Coming soon">week</button>
+          <button class="cal-view-btn" type="button" disabled title="Coming soon">day</button>
+        </div>
+      </div>
+      <div style="padding:0 16px 16px">
+        <div class="cal-hdr"><div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div></div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">All Sessions</div>
+        <select id="sessStudentFilter" aria-label="Filter sessions by student" style="padding:7px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:13px;background:var(--bg);outline:none;cursor:pointer">
+          <option value="">All Students</option>
+        </select>
+      </div>
+      <div class="table-wrap" id="sessionsTable"></div>
+    </div>
+  </div>
+
+  <!-- ══ PAYMENTS ══ -->
+  <div class="page" id="page-payments">
+    <div class="ph">
+      <div><h1>Payments</h1><p>Track your earnings and student dues.</p></div>
+      <button class="btn btn-black" data-action="openAddPayment" type="button">+ Record Payment</button>
+    </div>
+
+    <div class="pay-stats">
+      <div class="pay-card featured">
+        <div class="pay-icon"><svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+        <div class="pay-label">Total Collected (All Time)</div>
+        <div class="pay-val" id="p-total">0</div>
+      </div>
+      <div class="pay-card">
+        <div class="pay-icon" style="background:var(--purple-bg)"><svg width="20" height="20" fill="none" stroke="#6366f1" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="7 17 17 7"/><polyline points="7 7 17 7 17 17"/></svg></div>
+        <div class="pay-label">Collected This Month</div>
+        <div class="pay-val" id="p-month">0</div>
+      </div>
+      <div class="pay-card red-card">
+        <div class="pay-icon" style="background:var(--red-bg)"><svg width="20" height="20" fill="none" stroke="#ef4444" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="17 7 7 17"/><polyline points="17 17 7 17 7 7"/></svg></div>
+        <div class="pay-label">Outstanding Dues</div>
+        <div class="pay-val" id="p-dues">0</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Transaction History</div>
+        <div style="display:flex;gap:10px">
+          <div class="search-wrap" style="width:220px">
+            <span class="search-ico" aria-hidden="true"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+            <input id="paySearch" placeholder="Search..." aria-label="Search payments">
+          </div>
+        </div>
+      </div>
+      <div class="table-wrap" id="payTable"></div>
+    </div>
+  </div>
+
+  <!-- ══ SETTINGS ══ -->
+  <div class="page" id="page-settings">
+    <div class="ph"><div><h1>Settings</h1><p>Make TutorFlow yours.</p></div></div>
+
+    <!-- Profile FIRST (most used) -->
+    <div class="set-card">
+      <h3>👤 Your Profile</h3>
+      <p>This name appears on your dashboard greeting.</p>
+      <div class="frow">
+        <div class="fg"><label for="settingName">Your Name</label><input type="text" id="settingName" placeholder="e.g. Priya Sharma"></div>
+        <div class="fg"><label for="settingCur">Currency Symbol</label><input type="text" id="settingCur" placeholder="₹" maxlength="3"></div>
+      </div>
+      <button class="btn btn-black" data-action="saveProfile" type="button">Save Profile</button>
+    </div>
+
+    <!-- Cloud sync — collapsible -->
+    <div class="set-card">
+      <button class="set-toggle" type="button" data-action="toggleSection" data-section="cloud-section">
+        <h3>☁️ Google Sheets Backup</h3>
+        <span class="chevron">▼</span>
+      </button>
+      <div class="set-body" id="cloud-section" style="padding-top:14px">
+        <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Connect to Google Sheets so your data is backed up automatically. Until then, data stays in your browser.</p>
+        <div class="fg"><label for="scriptUrl">Apps Script Web App URL</label><input type="url" id="scriptUrl" placeholder="https://script.google.com/macros/s/YOUR_ID/exec"></div>
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+          <button class="btn btn-black" data-action="saveScript" type="button">Save & Test</button>
+          <button class="btn btn-outline" data-action="loadFromSheet" type="button" style="border-radius:999px">Sync from Sheet</button>
+          <span id="connStatus" style="font-size:13px;font-weight:500"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Setup guide — collapsible, starts collapsed -->
+    <div class="set-card">
+      <button class="set-toggle" type="button" data-action="toggleSection" data-section="guide-section">
+        <h3>📖 Setup Guide</h3>
+        <span class="chevron">▼</span>
+      </button>
+      <div class="set-body collapsed" id="guide-section" style="padding-top:14px">
+        <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Follow these 6 steps to connect Google Sheets as a free backend:</p>
+        <div class="steps">
+          <div class="step">Go to <strong>sheets.google.com</strong> and create a new blank spreadsheet. Name it "TutorFlow Data".</div>
+          <div class="step">In the spreadsheet, click <strong>Extensions &rarr; Apps Script</strong>. Delete any existing code.</div>
+          <div class="step">Paste the entire contents of <strong>google-apps-script.gs</strong> (included in your download) into the editor. Save it.</div>
+          <div class="step">Select <strong>setupSheets</strong> in the dropdown and click Run. Approve permissions when asked.</div>
+          <div class="step">Click <strong>Deploy &rarr; New Deployment &rarr; Web App</strong>. Set "Execute as: Me", "Who has access: Anyone". Deploy.</div>
+          <div class="step">Copy the URL, paste it above, click <strong>Save &amp; Test Connection</strong>. Done!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data management — collapsible -->
+    <div class="set-card">
+      <button class="set-toggle" type="button" data-action="toggleSection" data-section="data-section">
+        <h3>🗄️ Data Management</h3>
+        <span class="chevron">▼</span>
+      </button>
+      <div class="set-body" id="data-section" style="padding-top:14px">
+        <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Export your data or start fresh.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-outline btn-sm" data-action="exportCSV" type="button">Export as CSV</button>
+          <button class="btn btn-red btn-sm" data-action="clearData" type="button">Clear All Local Data</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ══════════ MOBILE BOTTOM NAV ══════════ -->
+<nav class="bottom-nav" id="bottomNav" aria-label="Mobile navigation">
+  <div class="bottom-nav-inner">
+    <button class="bnav-item active" data-page="dashboard" type="button">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      Home
+    </button>
+    <button class="bnav-item" data-page="students" type="button">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      Students
+    </button>
+    <button class="bnav-item" data-page="calendar" type="button">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Calendar
+    </button>
+    <button class="bnav-item" data-page="payments" type="button">
+      <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      Payments
+    </button>
+    <button class="bnav-item" data-page="settings" type="button">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Settings
+    </button>
+  </div>
+</nav>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<!-- ══════════ MODALS ══════════ -->
+
+<!-- ADD STUDENT -->
+<div class="overlay" id="modal-addStudent" role="dialog" aria-modal="true" aria-labelledby="addStudentTitle">
+  <div class="modal">
+    <h2 id="addStudentTitle">Add New Student</h2>
+    <p class="sub">Fill in the details to add a student to your roster.</p>
+    <div class="frow">
+      <div class="fg"><label for="s-name">Full Name *</label><input id="s-name" placeholder="e.g. Arjun Sharma"></div>
+      <div class="fg"><label for="s-grade">Grade / Level</label><input id="s-grade" placeholder="e.g. 10"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label for="s-subject">Subject(s)</label><input id="s-subject" placeholder="e.g. Eco, Math"></div>
+      <div class="fg"><label for="s-rate">Rate per Hour</label><input type="number" id="s-rate" placeholder="2500"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label for="s-parent">Parent / Guardian</label><input id="s-parent" placeholder="Parent name"></div>
+      <div class="fg"><label for="s-contact">Contact</label><input id="s-contact" placeholder="Phone or email"></div>
+    </div>
+    <div class="fg"><label for="s-notes">Schedule &amp; Notes</label><textarea id="s-notes" rows="2" placeholder="e.g. Tuesdays &amp; Thursdays 4pm"></textarea></div>
+    <div class="mfooter">
+      <button class="btn btn-outline" type="button" data-action="closeAddStudent">Cancel</button>
+      <button class="btn btn-black" type="button" data-action="doAddStudent">Add Student</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT STUDENT -->
+<div class="overlay" id="modal-editStudent" role="dialog" aria-modal="true" aria-labelledby="editStudentTitle">
+  <div class="modal">
+    <h2 id="editStudentTitle">Edit Student</h2>
+    <p class="sub">Update student information below.</p>
+    <input type="hidden" id="es-id">
+    <div class="frow">
+      <div class="fg"><label for="es-name">Full Name *</label><input id="es-name"></div>
+      <div class="fg"><label for="es-grade">Grade / Level</label><input id="es-grade"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label for="es-subject">Subject(s)</label><input id="es-subject"></div>
+      <div class="fg"><label for="es-rate">Rate per Hour</label><input type="number" id="es-rate"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label for="es-parent">Parent / Guardian</label><input id="es-parent"></div>
+      <div class="fg"><label for="es-contact">Contact</label><input id="es-contact"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label for="es-status">Status</label>
+        <select id="es-status"><option>Active</option><option>Inactive</option><option>On Hold</option></select>
+      </div>
+      <div class="fg"><label for="es-notes">Schedule &amp; Notes</label><input id="es-notes"></div>
+    </div>
+    <div class="mfooter">
+      <button class="btn btn-red btn-sm" type="button" data-action="doDeleteStudent">Delete Student</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-outline" type="button" data-action="closeEditStudent">Cancel</button>
+      <button class="btn btn-black" type="button" data-action="doUpdateStudent">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD SESSION -->
+<div class="overlay" id="modal-addSession" role="dialog" aria-modal="true" aria-labelledby="addSessionTitle">
+  <div class="modal">
+    <h2 id="addSessionTitle">Schedule Session</h2>
+    <p class="sub">Log a new tutoring session.</p>
+    <div class="frow">
+      <div class="fg"><label for="sess-student">Student *</label><select id="sess-student"><option value="">Select student...</option></select></div>
+      <div class="fg"><label for="sess-date">Date *</label><input type="date" id="sess-date"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label for="sess-start">Start Time</label><input type="time" id="sess-start"></div>
+      <div class="fg"><label for="sess-dur">Duration (hours)</label><input type="number" id="sess-dur" step="0.5" min="0.5" placeholder="1"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label for="sess-topic">Subject / Topic</label><input id="sess-topic" placeholder="e.g. Algebra, Chapter 5"></div>
+      <div class="fg"><label for="sess-status">Status</label>
+        <select id="sess-status"><option value="Scheduled">Scheduled</option><option value="Completed">Completed</option><option value="Cancelled">Cancelled</option></select>
+      </div>
+    </div>
+    <div class="fg"><label for="sess-notes">Notes</label><textarea id="sess-notes" rows="2" placeholder="Topics covered, homework assigned..."></textarea></div>
+    <div class="mfooter">
+      <button class="btn btn-outline" type="button" data-action="closeAddSession">Cancel</button>
+      <button class="btn btn-black" type="button" data-action="doAddSession">Save Session</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT SESSION -->
+<div class="overlay" id="modal-editSession" role="dialog" aria-modal="true" aria-labelledby="editSessionTitle">
+  <div class="modal">
+    <h2 id="editSessionTitle">Edit Session</h2>
+    <p class="sub">Update session details.</p>
+    <input type="hidden" id="es2-id">
+    <div class="frow">
+      <div class="fg"><label for="es2-student">Student *</label><select id="es2-student"><option value="">Select student...</option></select></div>
+      <div class="fg"><label for="es2-date">Date *</label><input type="date" id="es2-date"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label for="es2-start">Start Time</label><input type="time" id="es2-start"></div>
+      <div class="fg"><label for="es2-dur">Duration (hours)</label><input type="number" id="es2-dur" step="0.5" min="0.5"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label for="es2-topic">Subject / Topic</label><input id="es2-topic"></div>
+      <div class="fg"><label for="es2-status">Status</label>
+        <select id="es2-status"><option value="Scheduled">Scheduled</option><option value="Completed">Completed</option><option value="Cancelled">Cancelled</option></select>
+      </div>
+    </div>
+    <div class="fg"><label for="es2-notes">Notes</label><textarea id="es2-notes" rows="2"></textarea></div>
+    <div class="mfooter">
+      <button class="btn btn-red btn-sm" type="button" data-action="doDeleteSession">Delete</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-outline" type="button" data-action="closeEditSession">Cancel</button>
+      <button class="btn btn-black" type="button" data-action="doUpdateSession">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD PAYMENT -->
+<div class="overlay" id="modal-addPayment" role="dialog" aria-modal="true" aria-labelledby="addPaymentTitle">
+  <div class="modal">
+    <h2 id="addPaymentTitle">Record Payment</h2>
+    <p class="sub">Log a payment received from a student.</p>
+    <div class="frow">
+      <div class="fg"><label for="pay-student">Student *</label><select id="pay-student"><option value="">Select student...</option></select></div>
+      <div class="fg"><label for="pay-date">Date *</label><input type="date" id="pay-date"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label for="pay-amount">Amount *</label><input type="number" id="pay-amount" placeholder="5000"></div>
+      <div class="fg"><label for="pay-method">Payment Mode</label>
+        <select id="pay-method"><option>Cash</option><option>UPI</option><option>Bank Transfer</option><option>Cheque</option><option>Other</option></select>
+      </div>
+    </div>
+    <div class="fg"><label for="pay-notes">Notes</label><textarea id="pay-notes" rows="2" placeholder="e.g. For March sessions"></textarea></div>
+    <div class="mfooter">
+      <button class="btn btn-outline" type="button" data-action="closeAddPayment">Cancel</button>
+      <button class="btn btn-black" type="button" data-action="doAddPayment">Record Payment</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DELETE -->
+<div class="overlay" id="modal-confirm" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle">
+  <div class="modal confirm-modal">
+    <h2 id="confirmTitle">Are you sure?</h2>
+    <p class="sub" id="confirmMsg">This action cannot be undone.</p>
+    <div class="mfooter">
+      <button class="btn btn-outline" type="button" data-action="closeConfirm">Cancel</button>
+      <button class="btn btn-black" id="confirmOkBtn" type="button" style="background:var(--red)">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  XSS PROTECTION
+// ══════════════════════════════════════════════
+const _escEl = document.createElement('div');
+function esc(s) {
+  _escEl.textContent = s ?? '';
+  return _escEl.innerHTML;
+}
+function escAttr(s) {
+  return esc(s).replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+}
+
+// ══════════════════════════════════════════════
+//  STATE  (persisted to localStorage)
+// ══════════════════════════════════════════════
+let SCRIPT_URL = localStorage.getItem('tf_url') || '';
+let TUTOR_NAME = localStorage.getItem('tf_name') || 'Private Tutor';
+let CUR        = localStorage.getItem('tf_cur')  || '₹';
+
+function loadState(key, def) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch { return def; }
+}
+function saveState(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+let students = loadState('tf_students', []);
+let sessions = loadState('tf_sessions', []);
+let payments = loadState('tf_payments', []);
+
+// ── Data migration: convert old name-based links to id-based ──
+(function migrateToIdLinks() {
+  let changed = false;
+  sessions.forEach(se => {
+    if (se.studentId) return;
+    const match = students.find(s => s.name === se.student);
+    if (match) { se.studentId = match.id; changed = true; }
+  });
+  payments.forEach(p => {
+    if (p.studentId) return;
+    const match = students.find(s => s.name === p.student);
+    if (match) { p.studentId = match.id; changed = true; }
+  });
+  if (changed) {
+    saveState('tf_sessions', sessions);
+    saveState('tf_payments', payments);
+  }
+})();
+
+// Seed demo data if empty
+if (!students.length) {
+  students = [
+    { id:'s1', name:'Aarav Sharma',  grade:'7',  subject:'Mathematics', rate:500,  parent:'Raj Sharma',   contact:'9876543210',   status:'Active',   notes:'Tue & Thu 4pm' },
+    { id:'s2', name:'Priya Patel',   grade:'9',  subject:'Science',     rate:600,  parent:'Meena Patel',  contact:'meena@m.com',  status:'Active',   notes:'Sat 10am' },
+    { id:'s3', name:'Rohan Mehta',   grade:'5',  subject:'English',     rate:400,  parent:'Anita Mehta',  contact:'9845001234',   status:'Active',   notes:'Mon Wed Fri 5pm' },
+    { id:'s4', name:'Sneha Rao',     grade:'11', subject:'Physics',     rate:700,  parent:'Kiran Rao',    contact:'9900112233',   status:'Active',   notes:'Daily 7pm' },
+  ];
+  saveState('tf_students', students);
+}
+if (!sessions.length) {
+  const td = today();
+  sessions = [
+    { id:'se1', studentId:'s1', student:'Aarav Sharma',  date:td,          start:'16:00', dur:1,   topic:'Algebra',    status:'Scheduled',  notes:'' },
+    { id:'se2', studentId:'s2', student:'Priya Patel',   date:td,          start:'10:00', dur:1.5, topic:'Chemistry',  status:'Scheduled',  notes:'' },
+    { id:'se3', studentId:'s3', student:'Rohan Mehta',   date:'2026-03-10', start:'17:00', dur:1,   topic:'Grammar',   status:'Completed',  notes:'Covered tenses' },
+    { id:'se4', studentId:'s4', student:'Sneha Rao',     date:'2026-03-11', start:'19:00', dur:1,   topic:'Mechanics', status:'Completed',  notes:'' },
+  ];
+  saveState('tf_sessions', sessions);
+}
+if (!payments.length) {
+  payments = [
+    { id:'p1', studentId:'s2', student:'Priya Patel',  date:'2026-03-05', amount:3600, method:'UPI',  notes:'Feb sessions' },
+    { id:'p2', studentId:'s1', student:'Aarav Sharma', date:'2026-03-01', amount:2000, method:'Cash', notes:'Feb sessions' },
+  ];
+  saveState('tf_payments', payments);
+}
+
+// ── helpers ──
+function today() { return new Date().toISOString().split('T')[0]; }
+function uid()   { return 'id_' + Date.now() + '_' + Math.random().toString(36).slice(2,6); }
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d + 'T12:00').toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+}
+const COLS = ['#6366f1','#f59e0b','#10b981','#ef4444','#3b82f6','#ec4899','#8b5cf6','#14b8a6'];
+function acol(name)  { return COLS[(name || 'A').charCodeAt(0) % COLS.length]; }
+function ainit(name) { return (name||'?').split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase(); }
+
+function studentName(idOrName) {
+  const s = students.find(x => x.id === idOrName);
+  if (s) return s.name;
+  return idOrName || '—';
+}
+
+function scell(name, sub='') {
+  const n = esc(name || '—');
+  const s = sub ? esc(sub) : '';
+  return `<div class="scell">
+    <div class="avatar" style="background:${acol(name)};width:36px;height:36px;font-size:13px">${esc(ainit(name))}</div>
+    <div><div class="scell-name">${n}</div>${s?`<div class="scell-sub">${s}</div>`:''}</div>
+  </div>`;
+}
+function v(id) { return document.getElementById(id)?.value || ''; }
+function setV(id, val) { const el = document.getElementById(id); if (el) el.value = val ?? ''; }
+
+function fmtCur(amount) {
+  return esc(CUR) + (amount||0).toLocaleString();
+}
+
+// ══════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════
+function goPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.bnav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page)?.classList.add('active');
+  document.querySelector(`.sidebar [data-page="${page}"]`)?.classList.add('active');
+  document.querySelector(`.bottom-nav [data-page="${page}"]`)?.classList.add('active');
+  if (page === 'calendar')  { renderCalendar(); renderSessionsTable(); }
+  if (page === 'students')  renderStudents();
+  if (page === 'payments')  renderPayTable();
+  if (page === 'dashboard') renderDashboard();
+}
+
+// ══════════════════════════════════════════════
+//  EVENT DELEGATION (replaces all inline onclick)
+// ══════════════════════════════════════════════
+document.addEventListener('click', function(e) {
+  const t = e.target.closest('[data-action]');
+  if (!t) {
+    // Handle nav items
+    const nav = e.target.closest('.nav-item');
+    if (nav && nav.dataset.page) { goPage(nav.dataset.page); return; }
+    // Handle data-goto links
+    const goto = e.target.closest('[data-goto]');
+    if (goto) { goPage(goto.dataset.goto); return; }
+    // Handle overlay background click to close
+    const overlay = e.target.closest('.overlay');
+    if (overlay && e.target === overlay) { overlay.classList.remove('open'); return; }
+    return;
+  }
+
+  const action = t.dataset.action;
+  switch(action) {
+    // Modals
+    case 'openAddStudent':  openM('addStudent');  break;
+    case 'openAddSession':  openM('addSession');  break;
+    case 'openAddPayment':  openM('addPayment');  break;
+    case 'closeAddStudent': closeM('addStudent'); break;
+    case 'closeEditStudent':closeM('editStudent');break;
+    case 'closeAddSession': closeM('addSession'); break;
+    case 'closeEditSession':closeM('editSession');break;
+    case 'closeAddPayment': closeM('addPayment'); break;
+    case 'closeConfirm':    closeM('confirm');    break;
+
+    // CRUD
+    case 'doAddStudent':    doAddStudent();    break;
+    case 'doUpdateStudent': doUpdateStudent(); break;
+    case 'doDeleteStudent': doDeleteStudent(); break;
+    case 'doAddSession':    doAddSession();    break;
+    case 'doUpdateSession': doUpdateSession(); break;
+    case 'doDeleteSession': doDeleteSession(); break;
+    case 'doAddPayment':    doAddPayment();    break;
+
+    // Calendar
+    case 'prevMonth':       shiftMonth(-1);    break;
+    case 'nextMonth':       shiftMonth(1);     break;
+    case 'jumpToday':       jumpToday();       break;
+
+    // Settings
+    case 'saveScript':      saveScript();      break;
+    case 'loadFromSheet':   loadFromSheet();   break;
+    case 'saveProfile':     saveProfile();     break;
+    case 'clearData':       confirmClearData();break;
+    case 'exportCSV':       exportCSV();       break;
+
+    // Quick Actions
+    case 'markAllTodayDone': markAllTodayDone(); break;
+    case 'copyLastWeek':     copyLastWeek();     break;
+    case 'markDone':         markSessionDone(t.dataset.id); break;
+
+    // Collapsible settings
+    case 'toggleSection':    toggleSection(t.dataset.section, t); break;
+
+    // Dynamic actions via data attributes
+    case 'editStudent':     openEditStudent(t.dataset.id); break;
+    case 'editSession':     openEditSession(t.dataset.id); break;
+    case 'deleteSession':   confirmDeleteSession(t.dataset.id); break;
+    case 'deletePayment':   deletePayment(t.dataset.id); break;
+    case 'payFor':          openPayFor(t.dataset.studentId); break;
+  }
+});
+
+// Bottom nav also uses data-page
+document.getElementById('bottomNav')?.addEventListener('click', function(e) {
+  const btn = e.target.closest('.bnav-item');
+  if (btn && btn.dataset.page) goPage(btn.dataset.page);
+});
+
+// Filter inputs
+document.getElementById('studentSearch')?.addEventListener('input', renderStudents);
+document.getElementById('statusFilter')?.addEventListener('change', renderStudents);
+document.getElementById('paySearch')?.addEventListener('input', renderPayTable);
+document.getElementById('sessStudentFilter')?.addEventListener('change', renderSessionsTable);
+
+// ══════════════════════════════════════════════
+//  MODALS
+// ══════════════════════════════════════════════
+function openM(name) {
+  const modal = document.getElementById('modal-' + name);
+  if (!modal) return;
+  modal.classList.add('open');
+  if (name === 'addStudent' || name === 'addSession' || name === 'addPayment') clearForm(name);
+  if (name === 'addSession' || name === 'addPayment' || name === 'editSession') fillDropdowns(name);
+  // Focus trap: focus first input
+  setTimeout(() => {
+    const firstInput = modal.querySelector('input:not([type=hidden]), select, textarea');
+    if (firstInput) firstInput.focus();
+  }, 50);
+}
+function closeM(name) {
+  document.getElementById('modal-' + name)?.classList.remove('open');
+}
+
+// Close modals on Escape
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    const open = document.querySelector('.overlay.open');
+    if (open) open.classList.remove('open');
+  }
+});
+
+function clearForm(name) {
+  const ids = {
+    addStudent:  ['s-name','s-grade','s-subject','s-rate','s-parent','s-contact','s-notes'],
+    addSession:  ['sess-date','sess-start','sess-dur','sess-topic','sess-notes'],
+    addPayment:  ['pay-amount','pay-notes']
+  };
+  (ids[name] || []).forEach(id => setV(id, ''));
+  if (name === 'addSession') {
+    setV('sess-date', today());
+    // Smart default: next round hour
+    const now = new Date();
+    const nextHour = (now.getHours() + 1) % 24;
+    setV('sess-start', String(nextHour).padStart(2,'0') + ':00');
+    setV('sess-dur', '1');
+  }
+  if (name === 'addPayment') setV('pay-date', today());
+}
+
+// Smart fill: when student changes in session form, auto-fill their subject
+document.getElementById('sess-student')?.addEventListener('change', function() {
+  const s = students.find(x => x.id === this.value);
+  if (s && s.subject) setV('sess-topic', s.subject);
+});
+// Smart fill: when student changes in payment form, suggest their dues amount
+document.getElementById('pay-student')?.addEventListener('change', function() {
+  const s = students.find(x => x.id === this.value);
+  if (!s) return;
+  const dues = calcDues().find(d => d.studentId === s.id);
+  if (dues && dues.bal > 0) setV('pay-amount', dues.bal);
+});
+
+function fillDropdowns(name) {
+  const active = students.filter(s => s.status !== 'Inactive');
+  const opts = '<option value="">Select student...</option>' + active.map(s => `<option value="${escAttr(s.id)}">${esc(s.name)}</option>`).join('');
+  if (name === 'addSession')  document.getElementById('sess-student').innerHTML = opts;
+  if (name === 'addPayment')  document.getElementById('pay-student').innerHTML  = opts;
+  if (name === 'editSession') document.getElementById('es2-student').innerHTML  = opts;
+  // also keep session student filter up to date
+  const sf = document.getElementById('sessStudentFilter');
+  if (sf) sf.innerHTML = '<option value="">All Students</option>' + active.map(s=>`<option value="${escAttr(s.id)}">${esc(s.name)}</option>`).join('');
+}
+
+// ══════════════════════════════════════════════
+//  STUDENT CRUD
+// ══════════════════════════════════════════════
+function doAddStudent() {
+  const name = v('s-name').trim();
+  if (!name) { toast('Please enter the student name.', 'error'); return; }
+  const s = { id:uid(), name, grade:v('s-grade'), subject:v('s-subject'), rate:parseFloat(v('s-rate'))||0, parent:v('s-parent'), contact:v('s-contact'), notes:v('s-notes'), status:'Active' };
+  students.push(s);
+  saveState('tf_students', students);
+  closeM('addStudent');
+  renderStudents();
+  renderDashboard();
+  fillDropdowns('addSession'); fillDropdowns('addPayment');
+  toast(esc(name) + ' added successfully!', 'success');
+  syncWrite('addStudent', s);
+}
+
+function openEditStudent(id) {
+  const s = students.find(x => x.id === id); if (!s) return;
+  setV('es-id', id); setV('es-name', s.name); setV('es-grade', s.grade); setV('es-subject', s.subject);
+  setV('es-rate', s.rate); setV('es-parent', s.parent); setV('es-contact', s.contact);
+  setV('es-status', s.status); setV('es-notes', s.notes);
+  openM('editStudent');
+}
+
+function doUpdateStudent() {
+  const id = v('es-id'), newName = v('es-name').trim();
+  if (!newName) { toast('Name is required.', 'error'); return; }
+  const idx = students.findIndex(s => s.id === id); if (idx < 0) return;
+  const oldName = students[idx].name;
+  students[idx] = { ...students[idx], name:newName, grade:v('es-grade'), subject:v('es-subject'), rate:parseFloat(v('es-rate'))||0, parent:v('es-parent'), contact:v('es-contact'), status:v('es-status'), notes:v('es-notes') };
+  // Update display name in sessions/payments that reference this student
+  if (oldName !== newName) {
+    sessions.forEach(se => { if (se.studentId === id) se.student = newName; });
+    payments.forEach(p => { if (p.studentId === id) p.student = newName; });
+    saveState('tf_sessions', sessions);
+    saveState('tf_payments', payments);
+  }
+  saveState('tf_students', students);
+  closeM('editStudent');
+  renderStudents(); renderDashboard();
+  fillDropdowns('addSession'); fillDropdowns('addPayment');
+  toast('Student updated!', 'success');
+  syncWrite('updateStudent', students[idx]);
+}
+
+function doDeleteStudent() {
+  const id = v('es-id'), s = students.find(x => x.id === id);
+  confirm2('Delete ' + esc(s?.name||'student') + '?', 'This cannot be undone.', () => {
+    students = students.filter(x => x.id !== id);
+    saveState('tf_students', students);
+    closeM('editStudent'); renderStudents(); renderDashboard();
+    fillDropdowns('addSession'); fillDropdowns('addPayment');
+    toast('Student deleted.', '');
+    syncWrite('deleteStudent', { id });
+  });
+}
+
+// ══════════════════════════════════════════════
+//  SESSION CRUD
+// ══════════════════════════════════════════════
+function doAddSession() {
+  const studentId = v('sess-student'), date = v('sess-date');
+  if (!studentId) { toast('Please select a student.', 'error'); return; }
+  if (!date)      { toast('Please enter a date.', 'error'); return; }
+  const sName = studentName(studentId);
+  const se = { id:uid(), studentId, student:sName, date, start:v('sess-start'), dur:parseFloat(v('sess-dur'))||1, topic:v('sess-topic'), status:v('sess-status'), notes:v('sess-notes') };
+  sessions.push(se);
+  saveState('tf_sessions', sessions);
+  closeM('addSession');
+  renderCalendar(); renderSessionsTable(); renderDashboard();
+  toast('Session saved!', 'success');
+  syncWrite('addSession', se);
+}
+
+function openEditSession(id) {
+  const se = sessions.find(x => x.id === id); if (!se) return;
+  fillDropdowns('editSession');
+  setV('es2-id', id); setV('es2-student', se.studentId || ''); setV('es2-date', se.date);
+  setV('es2-start', se.start); setV('es2-dur', se.dur); setV('es2-topic', se.topic);
+  setV('es2-status', se.status); setV('es2-notes', se.notes);
+  openM('editSession');
+}
+
+function doUpdateSession() {
+  const id = v('es2-id');
+  const idx = sessions.findIndex(s => s.id === id); if (idx < 0) return;
+  const studentId = v('es2-student');
+  const sName = studentName(studentId);
+  sessions[idx] = { ...sessions[idx], studentId, student:sName, date:v('es2-date'), start:v('es2-start'), dur:parseFloat(v('es2-dur'))||1, topic:v('es2-topic'), status:v('es2-status'), notes:v('es2-notes') };
+  saveState('tf_sessions', sessions);
+  closeM('editSession');
+  renderCalendar(); renderSessionsTable(); renderDashboard();
+  toast('Session updated!', 'success');
+  syncWrite('updateSession', sessions[idx]);
+}
+
+function doDeleteSession() {
+  const id = v('es2-id');
+  confirm2('Delete this session?', 'This cannot be undone.', () => {
+    sessions = sessions.filter(x => x.id !== id);
+    saveState('tf_sessions', sessions);
+    closeM('editSession');
+    renderCalendar(); renderSessionsTable(); renderDashboard();
+    toast('Session deleted.', '');
+    syncWrite('deleteSession', { id });
+  });
+}
+
+// ══════════════════════════════════════════════
+//  PAYMENT CRUD
+// ══════════════════════════════════════════════
+function doAddPayment() {
+  const studentId = v('pay-student'), date = v('pay-date'), amount = parseFloat(v('pay-amount'));
+  if (!studentId) { toast('Please select a student.', 'error'); return; }
+  if (!date)      { toast('Please enter a date.', 'error'); return; }
+  if (!amount || isNaN(amount)) { toast('Please enter a valid amount.', 'error'); return; }
+  const sName = studentName(studentId);
+  const p = { id:uid(), studentId, student:sName, date, amount, method:v('pay-method'), notes:v('pay-notes') };
+  payments.push(p);
+  saveState('tf_payments', payments);
+  closeM('addPayment');
+  renderPayTable(); renderDashboard();
+  toast(`${esc(CUR)}${amount.toLocaleString()} recorded for ${esc(sName)}!`, 'success');
+  syncWrite('addPayment', p);
+}
+
+function deletePayment(id) {
+  const p = payments.find(x => x.id === id);
+  confirm2(`Delete payment of ${esc(CUR)}${p?.amount} from ${esc(p?.student)}?`, 'This cannot be undone.', () => {
+    payments = payments.filter(x => x.id !== id);
+    saveState('tf_payments', payments);
+    renderPayTable(); renderDashboard();
+    toast('Payment deleted.', '');
+    syncWrite('deletePayment', { id });
+  });
+}
+
+function openPayFor(studentId) {
+  fillDropdowns('addPayment');
+  openM('addPayment');
+  setTimeout(() => setV('pay-student', studentId), 50);
+}
+
+// ══════════════════════════════════════════════
+//  QUICK ACTIONS
+// ══════════════════════════════════════════════
+function markSessionDone(id) {
+  const se = sessions.find(x => x.id === id);
+  if (!se || se.status === 'Completed') return;
+  const prev = se.status;
+  se.status = 'Completed';
+  saveState('tf_sessions', sessions);
+  renderDashboard(); renderCalendar(); renderSessionsTable();
+  // Flash the row
+  const row = document.querySelector(`[data-id="${id}"]`);
+  if (row) row.classList.add('flash-success');
+  toastUndo(`Marked "${se.student}" as done!`, 'success', () => {
+    se.status = prev;
+    saveState('tf_sessions', sessions);
+    renderDashboard(); renderCalendar(); renderSessionsTable();
+  });
+  syncWrite('updateSession', se);
+}
+
+function markAllTodayDone() {
+  const td = today();
+  const todaySess = sessions.filter(s => s.date === td && s.status === 'Scheduled');
+  if (!todaySess.length) { toast("No scheduled sessions today!", ''); return; }
+  const prevStates = todaySess.map(s => ({ id:s.id, status:s.status }));
+  todaySess.forEach(s => s.status = 'Completed');
+  saveState('tf_sessions', sessions);
+  renderDashboard(); renderCalendar(); renderSessionsTable();
+  toastUndo(`Marked ${todaySess.length} session${todaySess.length>1?'s':''} as done!`, 'success', () => {
+    prevStates.forEach(p => {
+      const se = sessions.find(x => x.id === p.id);
+      if (se) se.status = p.status;
+    });
+    saveState('tf_sessions', sessions);
+    renderDashboard(); renderCalendar(); renderSessionsTable();
+  });
+}
+
+function copyLastWeek() {
+  const td = new Date();
+  const lastWeekStart = new Date(td); lastWeekStart.setDate(td.getDate() - 7);
+  const lastWeekEnd = new Date(td); lastWeekEnd.setDate(td.getDate() - 1);
+  const fmt = d => d.toISOString().split('T')[0];
+  const lwSessions = sessions.filter(s => s.date >= fmt(lastWeekStart) && s.date <= fmt(lastWeekEnd));
+  if (!lwSessions.length) { toast("No sessions found in the last 7 days to copy.", ''); return; }
+  const newSessions = lwSessions.map(s => {
+    const oldDate = new Date(s.date + 'T12:00');
+    oldDate.setDate(oldDate.getDate() + 7);
+    return { ...s, id:uid(), date:fmt(oldDate), status:'Scheduled', notes:'' };
+  });
+  sessions.push(...newSessions);
+  saveState('tf_sessions', sessions);
+  renderDashboard(); renderCalendar(); renderSessionsTable();
+  toastUndo(`Copied ${newSessions.length} session${newSessions.length>1?'s':''} to this week!`, 'success', () => {
+    const ids = new Set(newSessions.map(s => s.id));
+    sessions = sessions.filter(s => !ids.has(s.id));
+    saveState('tf_sessions', sessions);
+    renderDashboard(); renderCalendar(); renderSessionsTable();
+  });
+}
+
+// ══════════════════════════════════════════════
+//  COLLAPSIBLE SETTINGS
+// ══════════════════════════════════════════════
+function toggleSection(sectionId, toggleBtn) {
+  const body = document.getElementById(sectionId);
+  if (!body) return;
+  const chevron = toggleBtn.querySelector('.chevron');
+  body.classList.toggle('collapsed');
+  if (chevron) chevron.classList.toggle('open', !body.classList.contains('collapsed'));
+}
+
+// ══════════════════════════════════════════════
+//  RENDER DASHBOARD
+// ══════════════════════════════════════════════
+function renderDashboard() {
+  const now = new Date(), m = now.getMonth(), y = now.getFullYear(), td = today();
+  document.getElementById('greetMsg').textContent = (now.getHours()<12?'Good morning':now.getHours()<17?'Good afternoon':'Good evening') + ', ' + TUTOR_NAME + '!';
+  document.getElementById('todayLabel').textContent = now.toLocaleDateString('en-IN', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+  const activeS = students.filter(s => s.status !== 'Inactive');
+  document.getElementById('st-students').textContent = activeS.length;
+  const inactiveCount = students.length - activeS.length;
+  document.getElementById('st-students-help').textContent = inactiveCount ? `${inactiveCount} inactive` : 'all active';
+
+  const monthSess = sessions.filter(se => { const d = new Date(se.date+'T12:00'); return d.getMonth()===m && d.getFullYear()===y; });
+  document.getElementById('st-sessions').textContent = monthSess.length;
+  const completedCount = monthSess.filter(s => s.status === 'Completed').length;
+  document.getElementById('st-sessions-help').textContent = `${completedCount} completed, ${monthSess.length - completedCount} remaining`;
+
+  const monthPay = payments.filter(p => { const d = new Date(p.date+'T12:00'); return d.getMonth()===m && d.getFullYear()===y; });
+  const revenue = monthPay.reduce((s,p) => s + (p.amount||0), 0);
+  document.getElementById('st-revenue').textContent = CUR + revenue.toLocaleString();
+  document.getElementById('st-revenue-help').textContent = `${monthPay.length} payment${monthPay.length!==1?'s':''} this month`;
+
+  const dues = calcDues();
+  const totalDues = dues.reduce((s,d) => s + d.bal, 0);
+  document.getElementById('st-dues').textContent = CUR + totalDues.toLocaleString();
+  document.getElementById('st-dues-help').textContent = dues.length ? `from ${dues.length} student${dues.length!==1?'s':''}` : 'all clear!';
+  document.getElementById('p-dues').textContent  = CUR + totalDues.toLocaleString();
+  document.getElementById('p-total').textContent = CUR + payments.reduce((s,p) => s+(p.amount||0), 0).toLocaleString();
+  document.getElementById('p-month').textContent = CUR + revenue.toLocaleString();
+
+  // Today schedule
+  const todaySess = sessions.filter(s => s.date === td).sort((a,b)=>(a.start||'').localeCompare(b.start||''));
+  const te = document.getElementById('d-today');
+  te.innerHTML = todaySess.length === 0
+    ? `<div class="empty"><div class="empty-icon">🎉</div><h3>No classes today!</h3><p>Enjoy your free time, or schedule something new.</p><button class="empty-cta" type="button" data-action="openAddSession">+ Schedule a session</button></div>`
+    : todaySess.map(s => `
+      <div class="today-row" style="display:flex;align-items:center;gap:14px;padding:13px 20px;border-bottom:1px solid var(--border)" data-id="${escAttr(s.id)}">
+        <button class="mark-done-btn ${s.status==='Completed'?'done':''}" type="button" data-action="markDone" data-id="${escAttr(s.id)}" title="${s.status==='Completed'?'Done':'Mark as done'}">${s.status==='Completed'?'✓':'○'}</button>
+        <div style="min-width:46px;text-align:center"><div style="font-size:13px;font-weight:700">${esc(s.start||'—')}</div><div style="font-size:11px;color:var(--text3)">${esc(String(s.dur||1))}h</div></div>
+        <div style="width:3px;height:34px;border-radius:3px;background:${s.status==='Completed'?'var(--green)':'var(--purple)'}"></div>
+        <div style="flex:1;cursor:pointer" data-action="editSession" data-id="${escAttr(s.id)}">${scell(s.student, s.topic||'')}</div>
+        <div><span class="badge ${s.status==='Completed'?'badge-green':s.status==='Cancelled'?'badge-gray':'badge-purple'}">${esc(s.status)}</span></div>
+      </div>`).join('');
+
+  // Pending dues
+  const de = document.getElementById('d-dues');
+  de.innerHTML = dues.length === 0
+    ? `<div class="empty"><div class="empty-icon">✅</div><h3>All paid up!</h3><p>No outstanding balances</p></div>`
+    : dues.map(d => `
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--border)">
+        ${scell(d.name)}
+        <div style="margin-left:auto;text-align:right">
+          <div style="font-size:14px;font-weight:700;color:var(--red)">${fmtCur(d.bal)}</div>
+          <div style="font-size:11px;color:var(--text3)">${d.sessions} session${d.sessions!==1?'s':''}</div>
+        </div>
+        <button class="btn btn-black btn-xs" style="border-radius:999px" type="button" data-action="payFor" data-student-id="${escAttr(d.studentId)}">Pay</button>
+      </div>`).join('');
+
+  // Recent payments
+  const rp = [...payments].sort((a,b) => new Date(b.date)-new Date(a.date)).slice(0,5);
+  document.getElementById('d-payments').innerHTML = rp.length === 0
+    ? `<div class="empty"><div class="empty-icon">💰</div><h3>No payments yet</h3><p>Record your first payment</p></div>`
+    : `<table><thead><tr><th>Student</th><th>Date</th><th>Amount</th><th>Mode</th><th>Notes</th></tr></thead><tbody>`
+      + rp.map(p => `<tr>
+          <td>${scell(p.student)}</td>
+          <td style="color:var(--text2)">${fmtDate(p.date)}</td>
+          <td><span style="font-weight:700;color:var(--green)">${fmtCur(p.amount)}</span></td>
+          <td><span class="badge badge-gray">${esc(p.method||'—')}</span></td>
+          <td style="color:var(--text2);font-size:13px">${esc(p.notes||'—')}</td>
+        </tr>`).join('')
+      + `</tbody></table>`;
+}
+
+function calcDues() {
+  return students.filter(s=>s.status!=='Inactive').map(s => {
+    const completed = sessions.filter(se=>(se.studentId===s.id || se.student===s.name) && se.status==='Completed');
+    const owed = completed.reduce((sum,se)=>sum+(se.dur||1)*(s.rate||0),0);
+    const paid = payments.filter(p=>(p.studentId===s.id || p.student===s.name)).reduce((sum,p)=>sum+(p.amount||0),0);
+    const bal  = owed - paid;
+    return { name:s.name, studentId:s.id, bal, sessions:completed.length };
+  }).filter(d => d.bal > 0);
+}
+
+// ══════════════════════════════════════════════
+//  RENDER STUDENTS
+// ══════════════════════════════════════════════
+function renderStudents() {
+  const q  = (document.getElementById('studentSearch')?.value || '').toLowerCase();
+  const sf = document.getElementById('statusFilter')?.value || '';
+  let filtered = students.filter(s => {
+    const match = !q || s.name.toLowerCase().includes(q) || (s.subject||'').toLowerCase().includes(q);
+    const stat  = !sf || s.status === sf;
+    return match && stat;
+  });
+  const dues = calcDues();
+  const wrap = document.getElementById('studentsWrap');
+  if (!filtered.length) {
+    wrap.innerHTML = `<div class="panel"><div class="empty"><div class="empty-icon">👩‍🎓</div><h3>No students found</h3><p>Try a different search, or add someone new!</p><button class="empty-cta" type="button" data-action="openAddStudent">+ Add Your First Student</button></div></div>`;
+    return;
+  }
+  wrap.innerHTML = `<div class="s-grid">` + filtered.map(s => {
+    const d = dues.find(x=>x.studentId===s.id);
+    return `<div class="s-card">
+      <div class="s-card-top">
+        <div class="avatar" style="background:${acol(s.name)};width:46px;height:46px;font-size:16px">${esc(ainit(s.name))}</div>
+        <span class="badge ${s.status==='Active'?'badge-green':s.status==='Inactive'?'badge-red':'badge-yellow'}">${esc(s.status)}</span>
+      </div>
+      <div class="s-name">${esc(s.name)}</div>
+      <div class="s-sub">${esc(s.subject||'—')} · Grade ${esc(s.grade||'—')}</div>
+      <div class="s-meta">
+        <div class="s-row"><span class="s-row-l">Rate</span><span class="s-row-v">${fmtCur(s.rate)}/hr</span></div>
+        <div class="s-row"><span class="s-row-l">Parent</span><span class="s-row-v">${esc(s.parent||'—')}</span></div>
+        <div class="s-row"><span class="s-row-l">Contact</span><span class="s-row-v" style="font-size:12px">${esc(s.contact||'—')}</span></div>
+        ${d
+          ? `<div class="s-row"><span class="s-row-l" style="color:var(--red)">Balance Due</span><span class="s-row-v" style="color:var(--red)">${fmtCur(d.bal)}</span></div>`
+          : `<div class="s-row"><span style="font-size:12px;color:var(--green);font-weight:600">Fully paid</span></div>`}
+      </div>
+      <div class="s-actions">
+        <button class="btn btn-outline btn-sm" style="flex:1;border-radius:999px" type="button" data-action="editStudent" data-id="${escAttr(s.id)}">Edit</button>
+        <button class="btn btn-black btn-sm" style="flex:1;border-radius:999px" type="button" data-action="payFor" data-student-id="${escAttr(s.id)}">Pay</button>
+      </div>
+    </div>`;
+  }).join('') + `</div>`;
+}
+
+// ══════════════════════════════════════════════
+//  RENDER CALENDAR
+// ══════════════════════════════════════════════
+let calM = new Date().getMonth(), calY = new Date().getFullYear();
+function renderCalendar() {
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('calTitle').textContent = MONTHS[calM] + ' ' + calY;
+  const fd = new Date(calY, calM, 1).getDay();
+  const dim = new Date(calY, calM+1, 0).getDate();
+  const now = new Date();
+  let html = '';
+  for (let i = 0; i < 42; i++) {
+    let day, ds, cls = 'cal-cell';
+    if (i < fd) {
+      // Previous month days
+      const prevDate = new Date(calY, calM, -(fd - i - 1));
+      day = prevDate.getDate();
+      ds = prevDate.getFullYear() + '-' + String(prevDate.getMonth()+1).padStart(2,'0') + '-' + String(day).padStart(2,'0');
+      cls += ' other';
+    } else if (i - fd + 1 > dim) {
+      // Next month days
+      const nextDate = new Date(calY, calM+1, i - fd - dim + 1);
+      day = nextDate.getDate();
+      ds = nextDate.getFullYear() + '-' + String(nextDate.getMonth()+1).padStart(2,'0') + '-' + String(day).padStart(2,'0');
+      cls += ' other';
+    } else {
+      day = i - fd + 1;
+      ds = calY + '-' + String(calM+1).padStart(2,'0') + '-' + String(day).padStart(2,'0');
+      if (now.getDate()===day && now.getMonth()===calM && now.getFullYear()===calY) cls += ' today';
+    }
+    const daySess = sessions.filter(s => s.date === ds);
+    html += `<div class="${cls}">
+      <span class="day-n">${day}</span>
+      ${daySess.map(s=>`<button class="cal-chip ${esc((s.status||'scheduled').toLowerCase())}" title="${escAttr(s.student)}: ${escAttr(s.topic||'')}" type="button" data-action="editSession" data-id="${escAttr(s.id)}">${esc(s.student.split(' ')[0])}${s.start?' '+esc(s.start):''}</button>`).join('')}
+    </div>`;
+  }
+  document.getElementById('calGrid').innerHTML = html;
+}
+function shiftMonth(d) { calM+=d; if(calM>11){calM=0;calY++;}else if(calM<0){calM=11;calY--;} renderCalendar(); }
+function jumpToday() { calM=new Date().getMonth(); calY=new Date().getFullYear(); renderCalendar(); }
+
+// ══════════════════════════════════════════════
+//  RENDER SESSIONS TABLE
+// ══════════════════════════════════════════════
+function renderSessionsTable() {
+  const sf = document.getElementById('sessStudentFilter')?.value || '';
+  let f = [...sessions].filter(s => !sf || s.studentId === sf || s.student === sf).sort((a,b) => new Date(b.date)-new Date(a.date));
+  const el = document.getElementById('sessionsTable');
+  if (!f.length) { el.innerHTML = `<div class="empty"><div class="empty-icon">📚</div><h3>No sessions yet</h3><p>Tap the button above to schedule your first class!</p><button class="empty-cta" type="button" data-action="openAddSession">+ Schedule a Session</button></div>`; return; }
+  el.innerHTML = `<table><thead><tr><th>Student</th><th>Date</th><th>Time</th><th>Duration</th><th>Topic</th><th>Status</th><th>Actions</th></tr></thead><tbody>`
+    + f.map(s => `<tr>
+        <td>${scell(s.student)}</td>
+        <td style="color:var(--text2)">${fmtDate(s.date)}</td>
+        <td>${esc(s.start||'—')}</td>
+        <td>${esc(String(s.dur||1))}h</td>
+        <td>${esc(s.topic||'—')}</td>
+        <td><span class="badge ${s.status==='Completed'?'badge-green':s.status==='Cancelled'?'badge-gray':'badge-purple'}">${esc(s.status)}</span></td>
+        <td>
+          <button class="del-btn" data-action="editSession" data-id="${escAttr(s.id)}" title="Edit" type="button" style="margin-right:4px">✏️</button>
+          <button class="del-btn" data-action="deleteSession" data-id="${escAttr(s.id)}" title="Delete" type="button">🗑️</button>
+        </td>
+      </tr>`).join('')
+    + `</tbody></table>`;
+}
+
+function confirmDeleteSession(id) {
+  confirm2('Delete this session?', 'This cannot be undone.', () => {
+    sessions = sessions.filter(x => x.id !== id);
+    saveState('tf_sessions', sessions);
+    renderCalendar(); renderSessionsTable(); renderDashboard();
+    toast('Session deleted.', '');
+  });
+}
+
+// ══════════════════════════════════════════════
+//  RENDER PAYMENTS TABLE
+// ══════════════════════════════════════════════
+function renderPayTable() {
+  const q = (document.getElementById('paySearch')?.value || '').toLowerCase();
+  let f = [...payments].filter(p =>
+    !q || (p.student||'').toLowerCase().includes(q) || (p.notes||'').toLowerCase().includes(q) || (p.method||'').toLowerCase().includes(q)
+  ).sort((a,b) => new Date(b.date)-new Date(a.date));
+
+  const el = document.getElementById('payTable');
+  if (!f.length) { el.innerHTML = `<div class="empty"><div class="empty-icon">💰</div><h3>No payments yet</h3><p>Tap below to record your first payment!</p><button class="empty-cta" type="button" data-action="openAddPayment">+ Record a Payment</button></div>`; return; }
+  el.innerHTML = `<table><thead><tr><th>Student</th><th>Date</th><th>Amount</th><th>Type</th><th>Mode</th><th>Details</th><th>Actions</th></tr></thead><tbody>`
+    + f.map(p => `<tr>
+        <td>${scell(p.student)}</td>
+        <td style="color:var(--text2)">${fmtDate(p.date)}</td>
+        <td><span style="font-weight:700;color:var(--green)">${fmtCur(p.amount)}</span></td>
+        <td><span class="badge badge-green">Received</span></td>
+        <td>${esc(p.method||'—')}</td>
+        <td style="color:var(--text2);font-size:13px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.notes||'—')}</td>
+        <td><button class="del-btn" data-action="deletePayment" data-id="${escAttr(p.id)}" title="Delete payment" type="button">🗑️</button></td>
+      </tr>`).join('')
+    + `</tbody></table>`;
+}
+
+// ══════════════════════════════════════════════
+//  CONFIRM DIALOG
+// ══════════════════════════════════════════════
+function confirm2(title, msg, onOk) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMsg').textContent   = msg;
+  const btn = document.getElementById('confirmOkBtn');
+  btn.onclick = () => { closeM('confirm'); onOk(); };
+  openM('confirm');
+}
+
+function confirmClearData() {
+  confirm2('Clear all data?', 'This will delete all students, sessions, and payments from local storage. Cannot be undone.', () => {
+    ['tf_students','tf_sessions','tf_payments'].forEach(k => localStorage.removeItem(k));
+    students=[]; sessions=[]; payments=[];
+    renderDashboard(); renderStudents(); renderPayTable(); renderCalendar();
+    toast('All data cleared.', '');
+  });
+}
+
+// ══════════════════════════════════════════════
+//  CSV EXPORT
+// ══════════════════════════════════════════════
+function exportCSV() {
+  function toCSV(headers, rows) {
+    const escape = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+    return [headers.map(escape).join(','), ...rows.map(r => r.map(escape).join(','))].join('\n');
+  }
+  const studCSV = toCSV(
+    ['ID','Name','Grade','Subject','Rate','Parent','Contact','Status','Notes'],
+    students.map(s => [s.id,s.name,s.grade,s.subject,s.rate,s.parent,s.contact,s.status,s.notes])
+  );
+  const sessCSV = toCSV(
+    ['ID','StudentID','Student','Date','Start','Duration','Topic','Status','Notes'],
+    sessions.map(s => [s.id,s.studentId,s.student,s.date,s.start,s.dur,s.topic,s.status,s.notes])
+  );
+  const payCSV = toCSV(
+    ['ID','StudentID','Student','Date','Amount','Method','Notes'],
+    payments.map(p => [p.id,p.studentId,p.student,p.date,p.amount,p.method,p.notes])
+  );
+  const full = '=== STUDENTS ===\n' + studCSV + '\n\n=== SESSIONS ===\n' + sessCSV + '\n\n=== PAYMENTS ===\n' + payCSV;
+  const blob = new Blob([full], { type:'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'tutorflow-export-' + today() + '.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('Data exported!', 'success');
+}
+
+// ══════════════════════════════════════════════
+//  GOOGLE SHEETS API
+// ══════════════════════════════════════════════
+
+async function syncWrite(action, data) {
+  if (!SCRIPT_URL) return;
+  try {
+    const params = new URLSearchParams({ action });
+    const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+    params.set('payload', b64);
+    await fetch(SCRIPT_URL + '?' + params.toString(), { method:'GET', mode:'no-cors' });
+  } catch(e) {
+    console.warn('Sheet sync (write) failed — data is safe locally:', e.message);
+  }
+}
+
+async function loadFromSheet() {
+  if (!SCRIPT_URL) { toast('No Sheet URL set. Go to Settings.', 'error'); return; }
+  toast('Syncing from Google Sheet...', '');
+  try {
+    const url = SCRIPT_URL + '?action=getAll';
+    const r = await fetch(url, { method:'GET' });
+    const j = await r.json();
+    if (j.students) { students = j.students; saveState('tf_students', students); }
+    if (j.sessions) { sessions = j.sessions; saveState('tf_sessions', sessions); }
+    if (j.payments) { payments = j.payments; saveState('tf_payments', payments); }
+    renderDashboard(); renderCalendar();
+    fillDropdowns('addSession'); fillDropdowns('addPayment');
+    toast('Synced from Google Sheet', 'success');
+  } catch(e) {
+    toast('Sheet sync skipped (CORS) — using local data. Your writes still save to Sheet.', '');
+    console.info('Read sync info:', e.message);
+  }
+}
+
+async function testConnection(url) {
+  try {
+    const r = await fetch(url + '?action=ping', { method:'GET' });
+    if (r.ok) return 'ok';
+    return 'error';
+  } catch {
+    // Likely CORS — try no-cors ping (can't verify response)
+    try {
+      await fetch(url + '?action=ping', { method:'GET', mode:'no-cors' });
+      return 'maybe';
+    } catch {
+      return 'error';
+    }
+  }
+}
+
+// ══════════════════════════════════════════════
+//  SETTINGS
+// ══════════════════════════════════════════════
+async function saveScript() {
+  const url = document.getElementById('scriptUrl').value.trim();
+  if (!url) { toast('Please enter a URL.', 'error'); return; }
+  SCRIPT_URL = url; localStorage.setItem('tf_url', url);
+  const st = document.getElementById('connStatus');
+  st.textContent = 'Testing...'; st.style.color = 'var(--text2)';
+  const result = await testConnection(url);
+  if (result === 'ok') {
+    st.textContent = 'Connected!'; st.style.color = 'var(--green)';
+    document.getElementById('setupBanner').classList.add('hidden');
+    toast('Connected to Google Sheet! Your data will now sync automatically.', 'success');
+  } else if (result === 'maybe') {
+    st.textContent = 'URL reachable (CORS prevents full verification)'; st.style.color = 'var(--orange)';
+    document.getElementById('setupBanner').classList.add('hidden');
+    toast('URL appears reachable, but CORS prevents full verification. Writes should still work.', '');
+  } else {
+    st.textContent = 'Could not reach URL'; st.style.color = 'var(--red)';
+    toast('Could not reach the URL. Check your deployment settings.', 'error');
+  }
+}
+
+function saveProfile() {
+  TUTOR_NAME = document.getElementById('settingName').value || 'Private Tutor';
+  CUR        = document.getElementById('settingCur').value  || '₹';
+  localStorage.setItem('tf_name', TUTOR_NAME);
+  localStorage.setItem('tf_cur', CUR);
+  document.getElementById('sidebarName').textContent = TUTOR_NAME;
+  toast('Profile saved!', 'success');
+  renderDashboard(); renderStudents(); renderPayTable();
+}
+
+// ══════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════
+function toast(msg, type='') {
+  const c = document.getElementById('toasts'), t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = (type==='success'?'✅ ':type==='error'?'❌ ':'ℹ️ ') + msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+function toastUndo(msg, type, undoFn) {
+  const c = document.getElementById('toasts'), t = document.createElement('div');
+  t.className = 'toast ' + (type||'');
+  const UNDO_MS = 5000;
+  t.innerHTML = `<span>${(type==='success'?'✅ ':type==='error'?'❌ ':'ℹ️ ')+esc(msg)}</span><button class="undo-btn" type="button">Undo</button>
+    <div class="undo-timer"><div class="undo-timer-bar" style="width:100%"></div></div>`;
+  c.appendChild(t);
+  const bar = t.querySelector('.undo-timer-bar');
+  requestAnimationFrame(() => { bar.style.width = '0%'; bar.style.transitionDuration = UNDO_MS+'ms'; });
+  let undone = false;
+  const timer = setTimeout(() => { if (!undone) t.remove(); }, UNDO_MS);
+  t.querySelector('.undo-btn').addEventListener('click', () => {
+    undone = true; clearTimeout(timer); t.remove();
+    if (undoFn) undoFn();
+    toast('Undone!', '');
+  });
+}
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('sidebarName').textContent = TUTOR_NAME;
+  document.getElementById('scriptUrl').value  = SCRIPT_URL;
+  document.getElementById('settingName').value = TUTOR_NAME;
+  document.getElementById('settingCur').value  = CUR;
+  if (SCRIPT_URL) document.getElementById('setupBanner').classList.add('hidden');
+  fillDropdowns('addSession'); fillDropdowns('addPayment');
+  renderDashboard();
+  renderCalendar();
+});
+</script>
+</body>
+</html>
