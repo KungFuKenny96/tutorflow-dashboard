@@ -1666,7 +1666,7 @@ function toastUndo(msg, type, undoFn) {
 // ══════════════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', () => {
+function initApp() {
   document.getElementById('sidebarName').textContent = TUTOR_NAME;
   document.getElementById('scriptUrl').value  = SCRIPT_URL;
   document.getElementById('settingName').value = TUTOR_NAME;
@@ -1675,7 +1675,15 @@ document.addEventListener('DOMContentLoaded', () => {
   fillDropdowns('addSession'); fillDropdowns('addPayment');
   renderDashboard();
   renderCalendar();
-});
+}
+
+// Run init — if DOM is already loaded (script at bottom of body), run immediately.
+// Otherwise wait for DOMContentLoaded.
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
 </script>
 </body>
 </html>
